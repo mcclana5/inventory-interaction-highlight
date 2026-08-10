@@ -3,7 +3,7 @@
 [![RuneLite Plugin Hub](https://img.shields.io/badge/RuneLite-Plugin%20Hub-blue.svg)](https://runelite.net/plugin-hub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A high-performance, fully customizable RuneLite plugin that provides dynamic visual overlays for inventory items during **hover**, **active click press**, **item selection ("Use")**, and **shift-drop** states.
+A customizable RuneLite plugin that provides dynamic visual overlays for inventory items during **hover**, **active click press**, **item selection ("Use")**, and **shift-drop** states.
 
 ![Plugin Icon](icon.png)
 
@@ -17,19 +17,13 @@ A high-performance, fully customizable RuneLite plugin that provides dynamic vis
   * Adjustable border width (1–5px) and custom fill opacity.
 
 * 👆 **Tactile Active Click Feedback**:
-  * Slightly insets highlight (1px) and boosts brightness during mouse press down for satisfying visual feedback.
+  * Insets highlight (1px) and boosts brightness during mouse press down for tactile visual feedback.
 
 * ⚡ **Game-Tick Synchronized Selection Flash**:
-  * Rhythmically flashes a background-only fill on and off (300ms ON / 300ms OFF) once per server tick when an item is selected for **"Use"**.
+  * Rhythmically flashes a background-only fill once per server tick when an item is selected for **"Use"**.
 
 * 🔴 **Dynamic Shift-Drop Highlighting**:
   * Automatically switches highlight color to Red when the default left-click action is **"Drop"** (e.g. while holding `Shift`).
-
-* 🚀 **Zero-GC Guava Sprite Caching**:
-  * Uses Guava `CacheBuilder` to cache pre-rendered silhouette sprites, eliminating per-frame memory allocations and garbage collection stutter at high frame rates (60–144 FPS).
-
-* 🛡️ **Drag & Fast Swipe Suppression**:
-  * Prevents adjacent inventory slots from accidentally flashing during rapid mouse flicks or item dragging.
 
 * 🏦 **Interface Hiding**:
   * Option to automatically suppress overlays while the Bank or Deposit Box is open.
