@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+}
+
+group 'com.inventoryhighlight'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://repo.runelite.net'
+    }
+}
+
+def runeliteVersion = 'latest.release'
+
+dependencies {
+    compileOnly "net.runelite:client:${runeliteVersion}"
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    testImplementation "net.runelite:client:${runeliteVersion}"
+    testImplementation 'junit:junit:4.13.2'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+task runTest(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.inventoryhighlight.InventoryHighlightPluginTest'
+    enableAssertions = true
+}
