@@ -15,12 +15,18 @@ A customizable RuneLite plugin that provides dynamic visual overlays for invento
   * **Outline Styles**: *Item Silhouette*, *Corner Brackets*, or *Box*.
   * **Fill Styles**: *Item Silhouette*, *Background Only*, or *Box*.
   * Adjustable border width (1–5px) and custom fill opacity.
+    <img width="104" height="48" alt="hover_highlight" src="https://github.com/user-attachments/assets/730a16ba-02cc-4140-911e-b8b19dd1eb04" />
+
 
 * 👆 **Tactile Active Click Feedback**:
   * Insets highlight (1px) and boosts brightness during mouse press down for tactile visual feedback.
+    <img width="104" height="52" alt="click_effect" src="https://github.com/user-attachments/assets/f1947770-81d3-430f-be08-29e56c8bb083" />
+
 
 * ⚡ **Game-Tick Synchronized Selection Flash**:
   * Rhythmically flashes a background-only fill once per server tick when an item is selected for **"Use"**.
+    <img width="104" height="52" alt="select_flash" src="https://github.com/user-attachments/assets/e1488046-ddf0-4b7e-9782-5644643529c7" />
+
 
 * 🔴 **Dynamic Shift-Drop Highlighting**:
   * Automatically switches highlight color to Red when the default left-click action is **"Drop"** (e.g. while holding `Shift`).
