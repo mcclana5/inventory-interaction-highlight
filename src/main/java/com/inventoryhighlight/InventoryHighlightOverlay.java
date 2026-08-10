@@ -16,7 +16,6 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -73,25 +72,12 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             }
         }
 
-        // 2. Hide highlights when Bank or Deposit Box is open (if configured)
-        if (config.hideInBank()) {
-            Widget bank = client.getWidget(WidgetInfo.BANK_CONTAINER.getId());
-            if (bank != null && !bank.isHidden()) {
-                return;
-            }
-
-            Widget depositBox = client.getWidget(WidgetInfo.BANK_DEPOSIT_INVENTORY.getId());
-            if (depositBox != null && !depositBox.isHidden()) {
-                return;
-            }
-        }
-
         Rectangle bounds = itemWidget.getCanvasBounds();
         if (bounds == null) {
             return;
         }
 
-        // 3. Selection state highlight ("Use Item -> ...")
+        // 2. Selection state highlight ("Use Item -> ...")
         boolean isSelected = client.isWidgetSelected()
             && client.getSelectedWidget() != null
             && client.getSelectedWidget().equals(itemWidget.getWidget());
@@ -109,7 +95,7 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             return;
         }
 
-        // 4. Hover and active click highlight
+        // 3. Hover and active click highlight
         if (!config.highlightHover()) {
             return;
         }

@@ -16,25 +16,14 @@ A customizable RuneLite plugin that provides dynamic visual overlays for invento
   * **Fill Styles**: *Item Silhouette*, *Background Only*, or *Box*.
   * Adjustable border width (1–5px) and custom fill opacity.
 
-    <img width="104" height="48" alt="hover_highlight" src="https://github.com/user-attachments/assets/e8051d4c-17cc-43b6-8758-a37ed3a10042" />
-
 * 👆 **Tactile Active Click Feedback**:
   * Insets highlight (1px) and boosts brightness during mouse press down for tactile visual feedback.
-
-    <img width="104" height="52" alt="click_effect" src="https://github.com/user-attachments/assets/54e0abb7-25e4-41f8-9937-5fd789f25360" />
-
 
 * ⚡ **Game-Tick Synchronized Selection Flash**:
   * Rhythmically flashes a background-only fill once per server tick when an item is selected for **"Use"**.
 
-    <img width="104" height="52" alt="select_flash" src="https://github.com/user-attachments/assets/b134074f-8c65-4201-91b6-5e8f4f499179" />
-
-
 * 🔴 **Dynamic Shift-Drop Highlighting**:
   * Automatically switches highlight color to Red when the default left-click action is **"Drop"** (e.g. while holding `Shift`).
-
-* 🏦 **Interface Hiding**:
-  * Option to automatically suppress overlays while the Bank or Deposit Box is open.
 
 ---
 
@@ -44,7 +33,6 @@ The plugin settings are organized into 3 clean, intuitive sections:
 
 ### 1. 📁 **General Settings**
 * **Highlight Color**: Main color picker used across hover highlights, click feedback, and selection flashing (Default: *Quest Helper Cyan Blue*).
-* **Hide in Bank / Interfaces**: Suppresses all overlays while Bank or Deposit Box is open.
 
 ### 2. 📁 **Hover Settings**
 * **Enable Hover Highlight**: Toggle hover overlays.

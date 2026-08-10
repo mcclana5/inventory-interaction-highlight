@@ -10,7 +10,7 @@ import net.runelite.client.config.Range;
 
 @ConfigGroup("inventoryhighlight")
 public interface InventoryHighlightConfig extends Config {
-    @ConfigSection(name = "General Settings", description = "General color and interface settings", position = 1)
+    @ConfigSection(name = "General Settings", description = "General color settings", position = 1)
     String generalSection = "generalSection";
 
     @ConfigSection(name = "Hover Settings", description = "Hover highlight toggle, outlines, and fill appearance", position = 2)
@@ -24,11 +24,6 @@ public interface InventoryHighlightConfig extends Config {
     @ConfigItem(keyName = "hoverColor", name = "Highlight Color", description = "Main color used for hover highlights, active click feedback, and selection flashing", section = generalSection, position = 1)
     default Color hoverColor() {
         return new Color(0, 255, 255, 200); // Cyan Blue
-    }
-
-    @ConfigItem(keyName = "hideInBank", name = "Hide in Bank / Interfaces", description = "Hides all highlight overlays while the Bank or Deposit Box is open", section = generalSection, position = 2)
-    default boolean hideInBank() {
-        return false;
     }
 
     // HOVER SETTINGS (Toggle + Outline + Fill)
