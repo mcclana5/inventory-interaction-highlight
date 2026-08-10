@@ -11,36 +11,22 @@ A customizable RuneLite plugin that provides dynamic visual overlays for invento
 
 ## 🌟 Key Features
 
-### 🎯 **Customizable Hover Highlights**
-* **Outline Styles**: *Item Silhouette*, *Corner Brackets*, or *Box*.
-* **Fill Styles**: *Item Silhouette*, *Background Only*, or *Box*.
-* Adjustable border width (1–5px) and custom fill opacity.
+* 🎯 **Customizable Hover Highlights**:
+  * **Outline Styles**: *Item Silhouette*, *Corner Brackets*, or *Box*.
+  * **Fill Styles**: *Item Silhouette*, *Background Only*, or *Box*.
+  * Adjustable border width (1–5px) and custom fill opacity.
 
-![Hover Highlight Demo](img/hover_highlight.gif)
+* 👆 **Tactile Active Click Feedback**:
+  * Insets highlight (1px) and boosts brightness during mouse press down for tactile visual feedback.
 
----
+* ⚡ **Game-Tick Synchronized Selection Flash**:
+  * Rhythmically flashes a background-only fill once per server tick when an item is selected for **"Use"**.
 
-### 👆 **Tactile Active Click Feedback**
-* Insets highlight (1px) and boosts brightness during mouse press down for tactile visual feedback.
+* 🔴 **Dynamic Shift-Drop Highlighting**:
+  * Automatically switches highlight color to Red when the default left-click action is **"Drop"** (e.g. while holding `Shift`).
 
-![Click Feedback Demo](img/click_effect.gif)
-
----
-
-### ⚡ **Game-Tick Synchronized Selection Flash**
-* Rhythmically flashes a background-only fill once per server tick when an item is selected for **"Use"**.
-
-![Selection Flash Demo](img/select_flash.gif)
-
----
-
-### 🔴 **Dynamic Shift-Drop Highlighting**
-* Automatically switches highlight color to Red when the default left-click action is **"Drop"** (e.g. while holding `Shift`).
-
----
-
-### 🏦 **Interface Hiding**
-* Option to automatically suppress overlays while the Bank or Deposit Box is open.
+* 🏦 **Interface Hiding**:
+  * Option to automatically suppress overlays while the Bank or Deposit Box is open.
 
 ---
 
