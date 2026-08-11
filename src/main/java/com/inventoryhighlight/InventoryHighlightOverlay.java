@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
@@ -21,7 +22,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
 
-@SuppressWarnings("deprecation")
 public class InventoryHighlightOverlay extends WidgetItemOverlay {
     private static final long FLASH_HALF_TICK_MS = 300L;
     private static final int CLICK_PRESS_ALPHA_BOOST = 70;
@@ -36,11 +36,12 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
 
     private long lastGameTickTime = 0;
 
-    // High-performance Guava sprite cache (eliminates per-frame BufferedImage memory allocations)
+    // High-performance Guava sprite cache (eliminates per-frame BufferedImage
+    // memory allocations)
     private final Cache<String, BufferedImage> spriteCache = CacheBuilder.newBuilder()
-        .maximumSize(CACHE_MAX_SIZE)
-        .expireAfterAccess(CACHE_EXPIRATION_MINUTES, TimeUnit.MINUTES)
-        .build();
+            .maximumSize(CACHE_MAX_SIZE)
+            .expireAfterAccess(CACHE_EXPIRATION_MINUTES, TimeUnit.MINUTES)
+            .build();
 
     @Inject
     public InventoryHighlightOverlay(Client client, InventoryHighlightConfig config, ItemManager itemManager) {
@@ -79,12 +80,13 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
 
         // 2. Selection state highlight ("Use Item -> ...")
         boolean isSelected = client.isWidgetSelected()
-            && client.getSelectedWidget() != null
-            && client.getSelectedWidget().equals(itemWidget.getWidget());
+                && client.getSelectedWidget() != null
+                && client.getSelectedWidget().equals(itemWidget.getWidget());
 
         if (isSelected) {
             if (config.enableSelectionFlash()) {
-                // Game Tick Synchronized Flash Cycle: ON for first 300ms of game tick, OFF for second 300ms
+                // Game Tick Synchronized Flash Cycle: ON for first 300ms of game tick, OFF for
+                // second 300ms
                 long timeInTick = lastGameTickTime > 0 ? (System.currentTimeMillis() - lastGameTickTime) : 0;
                 boolean flashVisible = (timeInTick < FLASH_HALF_TICK_MS);
 
@@ -105,10 +107,7 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             return;
         }
 
-        Color activeColor = (isDropAction() && config.enableDropHighlight())
-            ? config.dropColor()
-            : config.hoverColor();
-
+        Color activeColor = getActiveHighlightColor();
         if (activeColor == null) {
             return;
         }
@@ -116,15 +115,15 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         if (isMouseDown && config.highlightClick()) {
             // 1-pixel inset bounds for tactile "button press" click effect
             Rectangle clickBounds = new Rectangle(
-                bounds.x + CLICK_PRESS_INSET_PX,
-                bounds.y + CLICK_PRESS_INSET_PX,
-                Math.max(1, bounds.width - (CLICK_PRESS_INSET_PX * 2)),
-                Math.max(1, bounds.height - (CLICK_PRESS_INSET_PX * 2))
-            );
+                    bounds.x + CLICK_PRESS_INSET_PX,
+                    bounds.y + CLICK_PRESS_INSET_PX,
+                    Math.max(1, bounds.width - (CLICK_PRESS_INSET_PX * 2)),
+                    Math.max(1, bounds.height - (CLICK_PRESS_INSET_PX * 2)));
 
             // Boost alpha for brighter/more solid click press color
             int pressAlpha = Math.min(255, activeColor.getAlpha() + CLICK_PRESS_ALPHA_BOOST);
-            Color pressColor = new Color(activeColor.getRed(), activeColor.getGreen(), activeColor.getBlue(), pressAlpha);
+            Color pressColor = new Color(activeColor.getRed(), activeColor.getGreen(), activeColor.getBlue(),
+                    pressAlpha);
 
             renderHoverHighlight(graphics, clickBounds, itemId, itemWidget.getQuantity(), pressColor);
         } else {
@@ -132,11 +131,20 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         }
     }
 
-    private boolean isDropAction() {
-        MenuEntry[] menuEntries = client.getMenuEntries();
-        if (menuEntries != null && menuEntries.length > 0) {
-            MenuEntry top = menuEntries[menuEntries.length - 1];
-            return top != null && "Drop".equalsIgnoreCase(top.getOption());
+    Color getActiveHighlightColor() {
+        return (isDropAction() && config.enableDropHighlight())
+                ? config.dropColor()
+                : config.hoverColor();
+    }
+
+    boolean isDropAction() {
+        Menu menu = client.getMenu();
+        if (menu != null) {
+            MenuEntry[] menuEntries = menu.getMenuEntries();
+            if (menuEntries != null && menuEntries.length > 0) {
+                MenuEntry top = menuEntries[menuEntries.length - 1];
+                return top != null && "Drop".equalsIgnoreCase(top.getOption());
+            }
         }
         return false;
     }
@@ -147,10 +155,12 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             return;
         }
 
-        int opacity = config.enableFill() ? Math.min(255, Math.max(0, config.fillOpacity())) : DEFAULT_SELECTION_OPACITY;
+        int opacity = config.enableFill() ? Math.min(255, Math.max(0, config.fillOpacity()))
+                : DEFAULT_SELECTION_OPACITY;
         Color fillColor = new Color(hoverColor.getRed(), hoverColor.getGreen(), hoverColor.getBlue(), opacity);
 
-        // Selection Flash ALWAYS uses Background Only Fill (zero outlines to avoid 3D mesh conflicts)
+        // Selection Flash ALWAYS uses Background Only Fill (zero outlines to avoid 3D
+        // mesh conflicts)
         BufferedImage bgFilled = getBackgroundOnlyFilledSprite(itemId, quantity, fillColor);
         if (bgFilled != null) {
             graphics.drawImage(bgFilled, bounds.x, bounds.y, null);
@@ -178,7 +188,8 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         graphics.setColor(oldColor);
     }
 
-    private void renderFill(Graphics2D graphics, Rectangle bounds, int itemId, int quantity, Color baseColor, FillStyle style, int rawOpacity) {
+    private void renderFill(Graphics2D graphics, Rectangle bounds, int itemId, int quantity, Color baseColor,
+            FillStyle style, int rawOpacity) {
         int opacity = Math.min(255, Math.max(0, rawOpacity));
         Color fillColor = new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), opacity);
 
@@ -205,7 +216,8 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         }
     }
 
-    private void renderOutline(Graphics2D graphics, Rectangle bounds, int itemId, int quantity, Color color, OutlineStyle style, int rawWidth) {
+    private void renderOutline(Graphics2D graphics, Rectangle bounds, int itemId, int quantity, Color color,
+            OutlineStyle style, int rawWidth) {
         int borderWidth = Math.max(1, rawWidth);
 
         switch (style) {
@@ -224,7 +236,8 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         }
     }
 
-    private void renderSilhouetteOutline(Graphics2D graphics, Rectangle bounds, int itemId, int quantity, Color color, int borderWidth) {
+    private void renderSilhouetteOutline(Graphics2D graphics, Rectangle bounds, int itemId, int quantity, Color color,
+            int borderWidth) {
         BufferedImage outline = itemManager.getItemOutline(itemId, quantity, color);
         if (outline != null) {
             graphics.drawImage(outline, bounds.x, bounds.y, null);

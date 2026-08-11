@@ -21,6 +21,7 @@ dependencies {
 
     testImplementation "net.runelite:client:${runeliteVersion}"
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
     testCompileOnly 'org.projectlombok:lombok:1.18.30'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
