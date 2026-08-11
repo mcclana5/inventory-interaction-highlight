@@ -35,14 +35,6 @@ public class InventoryHighlightRenderer {
             .expireAfterAccess(CACHE_EXPIRATION_MINUTES, TimeUnit.MINUTES)
             .build();
 
-    public static boolean isSpriteBased(FillStyle style) {
-        return style != null && style.isSpriteBased();
-    }
-
-    public static boolean isSpriteBased(OutlineStyle style) {
-        return style != null && style.isSpriteBased();
-    }
-
     public void renderHighlight(Graphics2D graphics, Rectangle bounds, int itemId, int quantity,
             Color color, InventoryHighlightConfig config, ItemManager itemManager) {
         Stroke oldStroke = graphics.getStroke();
