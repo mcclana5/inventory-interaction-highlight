@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import net.runelite.api.Client;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
@@ -13,17 +12,14 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.util.AsyncBufferedImage;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -69,7 +65,7 @@ public class InventoryHighlightOverlayTest {
 
         MenuEntry dropEntry = mock(MenuEntry.class);
         when(dropEntry.getOption()).thenReturn("Drop");
-        when(menu.getMenuEntries()).thenReturn(new MenuEntry[]{dropEntry});
+        when(menu.getMenuEntries()).thenReturn(new MenuEntry[] { dropEntry });
 
         Color activeColor = overlay.getActiveHighlightColor();
         assertEquals(VIBRANT_RED, activeColor);
@@ -81,7 +77,7 @@ public class InventoryHighlightOverlayTest {
 
         MenuEntry examineEntry = mock(MenuEntry.class);
         when(examineEntry.getOption()).thenReturn("Examine");
-        when(menu.getMenuEntries()).thenReturn(new MenuEntry[]{examineEntry});
+        when(menu.getMenuEntries()).thenReturn(new MenuEntry[] { examineEntry });
 
         Color activeColor = overlay.getActiveHighlightColor();
         assertEquals(CYAN_BLUE, activeColor);
@@ -93,7 +89,7 @@ public class InventoryHighlightOverlayTest {
 
         MenuEntry dropEntry = mock(MenuEntry.class);
         when(dropEntry.getOption()).thenReturn("Drop");
-        when(menu.getMenuEntries()).thenReturn(new MenuEntry[]{dropEntry});
+        when(menu.getMenuEntries()).thenReturn(new MenuEntry[] { dropEntry });
 
         Color activeColor = overlay.getActiveHighlightColor();
         assertEquals(CYAN_BLUE, activeColor);
@@ -111,7 +107,8 @@ public class InventoryHighlightOverlayTest {
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
         // Verify overlay delegates to renderer.renderHighlight
-        verify(renderer).renderHighlight(eq(graphics), eq(new Rectangle(0, 0, 36, 32)), eq(4151), eq(1), eq(CYAN_BLUE), eq(config), eq(itemManager));
+        verify(renderer).renderHighlight(eq(graphics), eq(new Rectangle(0, 0, 36, 32)), eq(4151), eq(1), eq(CYAN_BLUE),
+                eq(config), eq(itemManager));
     }
 
     @Test
@@ -128,7 +125,8 @@ public class InventoryHighlightOverlayTest {
         Rectangle expectedClickBounds = new Rectangle(1, 1, 34, 30);
 
         ArgumentCaptor<Color> colorCaptor = ArgumentCaptor.forClass(Color.class);
-        verify(renderer).renderHighlight(eq(graphics), eq(expectedClickBounds), eq(4151), eq(1), colorCaptor.capture(), eq(config), eq(itemManager));
+        verify(renderer).renderHighlight(eq(graphics), eq(expectedClickBounds), eq(4151), eq(1), colorCaptor.capture(),
+                eq(config), eq(itemManager));
 
         // Alpha boosted from 200 to 200 + 70 = 270 (clamped to 255)
         assertEquals(255, colorCaptor.getValue().getAlpha());
@@ -150,7 +148,8 @@ public class InventoryHighlightOverlayTest {
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
         // Selection flash delegates to renderer.renderSelectionHighlight
-        verify(renderer).renderSelectionHighlight(eq(graphics), eq(new Rectangle(0, 0, 36, 32)), eq(4151), eq(1), eq(CYAN_BLUE), eq(config), eq(itemManager));
+        verify(renderer).renderSelectionHighlight(eq(graphics), eq(new Rectangle(0, 0, 36, 32)), eq(4151), eq(1),
+                eq(CYAN_BLUE), eq(config), eq(itemManager));
     }
 
     @Test

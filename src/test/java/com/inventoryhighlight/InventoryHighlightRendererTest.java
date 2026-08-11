@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import net.runelite.api.ItemComposition;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.AsyncBufferedImage;
 import org.junit.Before;
@@ -236,7 +235,8 @@ public class InventoryHighlightRendererTest {
         renderer.renderHighlight(graphics, bounds, 4151, 1, CYAN_BLUE, config, itemManager);
         verify(itemManager, times(1)).getImage(eq(4151), eq(1), eq(false));
 
-        // Second render -> Cache HIT -> Uses spriteCache, does NOT call itemManager.getImage again!
+        // Second render -> Cache HIT -> Uses spriteCache, does NOT call
+        // itemManager.getImage again!
         renderer.renderHighlight(graphics, bounds, 4151, 1, CYAN_BLUE, config, itemManager);
         verify(itemManager, times(1)).getImage(eq(4151), eq(1), eq(false));
     }
@@ -256,15 +256,18 @@ public class InventoryHighlightRendererTest {
         Graphics2D graphics = createMockGraphics();
         Rectangle bounds = new Rectangle(0, 0, 36, 32);
 
-        // Render Silhouette Fill -> Cache Miss for sprite & mask -> Calculates mask once
+        // Render Silhouette Fill -> Cache Miss for sprite & mask -> Calculates mask
+        // once
         renderer.renderHighlight(graphics, bounds, 995, 1000, CYAN_BLUE, config, itemManager);
         verify(itemManager, times(1)).getImage(eq(995), eq(1000), eq(false));
 
-        // Switch to Background Fill with different color -> Cache Miss for sprite, but Cache HIT for maskCache!
+        // Switch to Background Fill with different color -> Cache Miss for sprite, but
+        // Cache HIT for maskCache!
         when(config.fillStyle()).thenReturn(FillStyle.BACKGROUND);
         renderer.renderHighlight(graphics, bounds, 995, 1000, Color.RED, config, itemManager);
 
-        // baseImg was NOT fetched again because maskCache served the pre-calculated mask!
+        // baseImg was NOT fetched again because maskCache served the pre-calculated
+        // mask!
         verify(itemManager, times(1)).getImage(eq(995), eq(1000), eq(false));
     }
 
