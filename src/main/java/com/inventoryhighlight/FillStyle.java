@@ -6,11 +6,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FillStyle {
-    BOX("Box"),
-    BACKGROUND("Background Only"),
-    ITEM_SILHOUETTE("Item Silhouette");
+    BOX("Box", false),
+    BACKGROUND("Background Only", true),
+    ITEM_SILHOUETTE("Item Silhouette", true);
 
     private final String name;
+    private final boolean spriteBased;
 
     @Override
     public String toString() {
