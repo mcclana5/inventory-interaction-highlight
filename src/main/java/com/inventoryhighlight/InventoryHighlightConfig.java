@@ -19,6 +19,9 @@ public interface InventoryHighlightConfig extends Config {
     @ConfigSection(name = "Interaction Settings", description = "Configuration for active click press feedback, item selection flashing, and drop action highlighting", position = 3)
     String interactionSection = "interactionSection";
 
+    @ConfigSection(name = "Bank Interface Settings", description = "Configuration for highlighting items inside the bank vault and bank inventory panel", position = 4)
+    String bankSection = "bankSection";
+
     // GENERAL SETTINGS
     @Alpha
     @ConfigItem(keyName = "hoverColor", name = "Highlight Color", description = "Main color used for hover highlights, active click feedback, and selection flashing", section = generalSection, position = 1)
@@ -84,5 +87,16 @@ public interface InventoryHighlightConfig extends Config {
     @ConfigItem(keyName = "dropColor", name = "Drop Color", description = "Color of the highlight overlay when the default left-click action is 'Drop'", section = interactionSection, position = 4)
     default Color dropColor() {
         return new Color(255, 50, 50, 200); // Vibrant Red
+    }
+
+    // BANK INTERFACE SETTINGS
+    @ConfigItem(keyName = "highlightBank", name = "Enable Bank Highlight", description = "Toggles highlight overlay when hovering over items in the main bank vault or bank inventory panel", section = bankSection, position = 1)
+    default boolean highlightBank() {
+        return false;
+    }
+
+    @ConfigItem(keyName = "highlightBankPlaceholders", name = "Highlight Placeholders", description = "Whether to highlight empty bank placeholder items when bank highlighting is enabled", section = bankSection, position = 2)
+    default boolean highlightBankPlaceholders() {
+        return false;
     }
 }

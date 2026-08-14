@@ -10,6 +10,7 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
@@ -37,7 +38,8 @@ public class InventoryHighlightOverlayTest {
 
     private static final Color CYAN_BLUE = new Color(0, 255, 255, 200);
     private static final Color VIBRANT_RED = new Color(255, 50, 50, 200);
-    private static final int INVENTORY_PARENT_ID = 983043;
+    private static final int INVENTORY_PARENT_ID = ComponentID.INVENTORY_CONTAINER;
+    private static final int BANK_VAULT_PARENT_ID = ComponentID.BANK_ITEM_CONTAINER;
 
     @Before
     public void setUp() {
@@ -54,6 +56,8 @@ public class InventoryHighlightOverlayTest {
         when(config.highlightHover()).thenReturn(true);
         when(config.highlightClick()).thenReturn(true);
         when(config.enableSelectionFlash()).thenReturn(true);
+        when(config.highlightBank()).thenReturn(false);
+        when(config.highlightBankPlaceholders()).thenReturn(false);
 
         overlay = new InventoryHighlightOverlay(client, config, itemManager, renderer);
     }
@@ -105,7 +109,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testHoverDelegatesToRenderer() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, INVENTORY_PARENT_ID, 1);
 
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
@@ -117,7 +121,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testRightClickedItemStaysHighlightedWhileMenuIsOpen() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 3); // Slot #3
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 3, INVENTORY_PARENT_ID, 1); // Slot #3
 
         // Mouse pointer has moved OUTSIDE bounds (e.g. to (100, 100) over context menu)
         when(client.getMouseCanvasPosition()).thenReturn(new Point(100, 100));
@@ -141,7 +145,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testOtherItemsSuppressedWhileRightClickMenuIsOpen() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0); // Slot #0
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, INVENTORY_PARENT_ID, 1); // Slot #0
 
         // Right-click menu is open targeting slot #3
         when(client.isMenuOpen()).thenReturn(true);
@@ -161,7 +165,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testClickFeedbackInsetsBoundsAndBoostsAlpha() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, INVENTORY_PARENT_ID, 1);
 
         // Simulate active mouse press down (Button 1)
         when(client.getMouseCurrentButton()).thenReturn(1);
@@ -182,7 +186,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testSelectionFlashRendersWhenSelected() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, INVENTORY_PARENT_ID, 1);
         Widget widget = itemWidget.getWidget();
 
         // Simulate item selected ("Use Item -> ...")
@@ -202,7 +206,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testDraggingWidgetSuppressesHighlightOnOtherSlots() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, INVENTORY_PARENT_ID, 1);
 
         Widget draggedWidget = mock(Widget.class);
         when(draggedWidget.getIndex()).thenReturn(5); // Dragging slot #5
@@ -223,12 +227,68 @@ public class InventoryHighlightOverlayTest {
         when(config.highlightHover()).thenReturn(false);
 
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, INVENTORY_PARENT_ID, 1);
 
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
         // No drawing occurs when highlightHover is disabled
         verify(renderer, never()).renderHighlight(any(), any(), anyInt(), anyInt(), any(), any(), any());
+    }
+
+    // ==========================================
+    // SECTION 3: BANK INTERFACE HIGHLIGHT TESTS
+    // ==========================================
+
+    @Test
+    public void testBankItemHighlightingDisabledByDefault() {
+        when(config.highlightBank()).thenReturn(false);
+
+        Graphics2D graphics = createMockGraphics();
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 1);
+
+        overlay.renderItemOverlay(graphics, 4151, itemWidget);
+
+        verify(renderer, never()).renderHighlight(any(), any(), anyInt(), anyInt(), any(), any(), any());
+    }
+
+    @Test
+    public void testBankItemHighlightingEnabledRendersHighlight() {
+        when(config.highlightBank()).thenReturn(true);
+
+        Graphics2D graphics = createMockGraphics();
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 1);
+
+        overlay.renderItemOverlay(graphics, 4151, itemWidget);
+
+        verify(renderer).renderHighlight(eq(graphics), eq(new Rectangle(0, 0, 36, 32)), eq(4151), eq(1), eq(CYAN_BLUE),
+                eq(config), eq(itemManager));
+    }
+
+    @Test
+    public void testBankPlaceholderSuppressedWhenHighlightPlaceholdersIsFalse() {
+        when(config.highlightBank()).thenReturn(true);
+        when(config.highlightBankPlaceholders()).thenReturn(false);
+
+        Graphics2D graphics = createMockGraphics();
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 0); // quantity == 0 (placeholder)
+
+        overlay.renderItemOverlay(graphics, 4151, itemWidget);
+
+        verify(renderer, never()).renderHighlight(any(), any(), anyInt(), anyInt(), any(), any(), any());
+    }
+
+    @Test
+    public void testBankPlaceholderHighlightedWhenHighlightPlaceholdersIsTrue() {
+        when(config.highlightBank()).thenReturn(true);
+        when(config.highlightBankPlaceholders()).thenReturn(true);
+
+        Graphics2D graphics = createMockGraphics();
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 0); // quantity == 0 (placeholder)
+
+        overlay.renderItemOverlay(graphics, 4151, itemWidget);
+
+        verify(renderer).renderHighlight(eq(graphics), eq(new Rectangle(0, 0, 36, 32)), eq(4151), eq(0), eq(CYAN_BLUE),
+                eq(config), eq(itemManager));
     }
 
     // ==========================================
@@ -242,16 +302,16 @@ public class InventoryHighlightOverlayTest {
         return g;
     }
 
-    private WidgetItem createMockWidgetItem(int x, int y, int width, int height, int slotIndex) {
+    private WidgetItem createMockWidgetItem(int x, int y, int width, int height, int slotIndex, int parentId, int quantity) {
         WidgetItem itemWidget = mock(WidgetItem.class);
         Widget widget = mock(Widget.class);
         Rectangle bounds = new Rectangle(x, y, width, height);
 
         when(itemWidget.getWidget()).thenReturn(widget);
         when(itemWidget.getCanvasBounds()).thenReturn(bounds);
-        when(itemWidget.getQuantity()).thenReturn(1);
+        when(itemWidget.getQuantity()).thenReturn(quantity);
         when(widget.getIndex()).thenReturn(slotIndex);
-        when(widget.getParentId()).thenReturn(INVENTORY_PARENT_ID);
+        when(widget.getParentId()).thenReturn(parentId);
 
         Point mousePos = new Point(x + width / 2, y + height / 2);
         when(client.getMouseCanvasPosition()).thenReturn(mousePos);

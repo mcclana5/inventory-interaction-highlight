@@ -9,6 +9,7 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.eventbus.Subscribe;
@@ -35,6 +36,7 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         this.itemManager = itemManager;
         this.renderer = renderer;
         showOnInventory();
+        showOnBank();
     }
 
     @Subscribe
@@ -46,6 +48,19 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget) {
         if (itemWidget == null || itemWidget.getWidget() == null) {
             return;
+        }
+
+        boolean isBankItem = isBankWidget(itemWidget.getWidget());
+
+        // Check Bank Interface configuration settings
+        if (isBankItem) {
+            if (!config.highlightBank()) {
+                return;
+            }
+            boolean isPlaceholder = itemWidget.getQuantity() == 0;
+            if (isPlaceholder && !config.highlightBankPlaceholders()) {
+                return;
+            }
         }
 
         // Check if mouse button is actively pressed down
@@ -97,15 +112,15 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
                                 renderer.renderHighlight(graphics, bounds, itemId, itemWidget.getQuantity(), activeColor, config, itemManager);
                             }
                         }
-                        return; // Suppress hover highlight on all other inventory slots while menu is open
+                        return; // Suppress hover highlight on all other inventory/bank slots while menu is open
                     }
                 }
             }
-            return; // Suppress hover highlight while any non-inventory menu is open
+            return; // Suppress hover highlight while any non-inventory/bank menu is open
         }
 
         // 4. Hover and active click highlight
-        if (!config.highlightHover()) {
+        if (!isBankItem && !config.highlightHover()) {
             return;
         }
 
@@ -138,11 +153,19 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         }
     }
 
-    private int getRightClickedInventorySlot(MenuEntry[] entries, int inventoryParentId) {
+    private boolean isBankWidget(Widget widget) {
+        if (widget == null) {
+            return false;
+        }
+        int parentId = widget.getParentId();
+        return parentId == ComponentID.BANK_ITEM_CONTAINER || parentId == ComponentID.BANK_INVENTORY_ITEM_CONTAINER;
+    }
+
+    private int getRightClickedInventorySlot(MenuEntry[] entries, int containerParentId) {
         for (int i = entries.length - 1; i >= 0; i--) {
             MenuEntry entry = entries[i];
-            if (entry != null && entry.getWidget() != null && entry.getWidget().getId() == inventoryParentId) {
-                return entry.getParam0(); // param0 is item slot index (0 to 27)
+            if (entry != null && entry.getWidget() != null && entry.getWidget().getId() == containerParentId) {
+                return entry.getParam0(); // param0 is item slot index
             }
         }
         return -1;

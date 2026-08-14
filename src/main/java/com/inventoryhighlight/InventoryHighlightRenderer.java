@@ -18,7 +18,7 @@ import net.runelite.client.game.ItemManager;
 @Slf4j
 @Singleton
 public class InventoryHighlightRenderer {
-    private static final int CACHE_MAX_SIZE = 150;
+    private static final int CACHE_MAX_SIZE = 500;
     private static final int CACHE_EXPIRATION_MINUTES = 10;
     private static final int MAX_TEXT_SCAN_HEIGHT = 12;
 
@@ -28,12 +28,19 @@ public class InventoryHighlightRenderer {
             .expireAfterAccess(CACHE_EXPIRATION_MINUTES, TimeUnit.MINUTES)
             .build();
 
-    // High-performance Guava mask cache (caches 2D text pixel masks on cache
-    // misses)
+    // High-performance Guava mask cache (caches 2D text pixel masks on cache misses)
     private final Cache<String, boolean[][]> maskCache = CacheBuilder.newBuilder()
             .maximumSize(CACHE_MAX_SIZE)
             .expireAfterAccess(CACHE_EXPIRATION_MINUTES, TimeUnit.MINUTES)
             .build();
+
+    public static boolean isSpriteBased(FillStyle style) {
+        return style != null && style.isSpriteBased();
+    }
+
+    public static boolean isSpriteBased(OutlineStyle style) {
+        return style != null && style.isSpriteBased();
+    }
 
     public void renderHighlight(Graphics2D graphics, Rectangle bounds, int itemId, int quantity,
             Color color, InventoryHighlightConfig config, ItemManager itemManager) {
@@ -65,8 +72,7 @@ public class InventoryHighlightRenderer {
         int opacity = config.enableFill() ? Math.min(255, Math.max(0, config.fillOpacity())) : 65;
         Color fillColor = new Color(hoverColor.getRed(), hoverColor.getGreen(), hoverColor.getBlue(), opacity);
 
-        // Selection Flash ALWAYS uses Background Only Fill (zero outlines to avoid 3D
-        // mesh conflicts)
+        // Selection Flash ALWAYS uses Background Only Fill (zero outlines to avoid 3D mesh conflicts)
         renderSpriteFill(graphics, bounds, itemId, quantity, fillColor, FillStyle.BACKGROUND, itemManager);
     }
 
