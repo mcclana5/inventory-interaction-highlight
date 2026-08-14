@@ -64,7 +64,26 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             return;
         }
 
-        // 2. Right-click menu locking and suppression while menu remains open
+        // 2. Selection state highlight ("Use Item -> ...")
+        boolean isSelected = client.isWidgetSelected()
+            && client.getSelectedWidget() != null
+            && client.getSelectedWidget().equals(itemWidget.getWidget());
+
+        if (isSelected) {
+            if (config.enableSelectionFlash()) {
+                // Game Tick Synchronized Flash Cycle: ON for first 300ms of game tick, OFF for second 300ms
+                long timeInTick = lastGameTickTime > 0 ? (System.currentTimeMillis() - lastGameTickTime) : 0;
+                boolean flashVisible = (timeInTick < FLASH_HALF_TICK_MS);
+
+                if (flashVisible) {
+                    renderer.renderSelectionHighlight(graphics, bounds, itemId, itemWidget.getQuantity(),
+                        config.hoverColor(), config, itemManager);
+                }
+            }
+            return;
+        }
+
+        // 3. Right-click menu locking and suppression while menu remains open
         if (client.isMenuOpen()) {
             Menu menu = client.getMenu();
             if (menu != null) {
@@ -83,25 +102,6 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
                 }
             }
             return; // Suppress hover highlight while any non-inventory menu is open
-        }
-
-        // 3. Selection state highlight ("Use Item -> ...")
-        boolean isSelected = client.isWidgetSelected()
-            && client.getSelectedWidget() != null
-            && client.getSelectedWidget().equals(itemWidget.getWidget());
-
-        if (isSelected) {
-            if (config.enableSelectionFlash()) {
-                // Game Tick Synchronized Flash Cycle: ON for first 300ms of game tick, OFF for second 300ms
-                long timeInTick = lastGameTickTime > 0 ? (System.currentTimeMillis() - lastGameTickTime) : 0;
-                boolean flashVisible = (timeInTick < FLASH_HALF_TICK_MS);
-
-                if (flashVisible) {
-                    renderer.renderSelectionHighlight(graphics, bounds, itemId, itemWidget.getQuantity(),
-                        config.hoverColor(), config, itemManager);
-                }
-            }
-            return;
         }
 
         // 4. Hover and active click highlight
