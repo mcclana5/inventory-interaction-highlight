@@ -22,6 +22,9 @@ public interface InventoryHighlightConfig extends Config {
     @ConfigSection(name = "Bank Interface Settings", description = "Configuration for highlighting items inside the bank vault and bank inventory panel", position = 4)
     String bankSection = "bankSection";
 
+    @ConfigSection(name = "Ignored Items Settings", description = "Configuration for excluding specific items by name from being highlighted", position = 5)
+    String ignoredSection = "ignoredSection";
+
     // GENERAL SETTINGS
     @Alpha
     @ConfigItem(keyName = "hoverColor", name = "Highlight Color", description = "Main color used for hover highlights, active click feedback, and selection flashing", section = generalSection, position = 1)
@@ -98,5 +101,16 @@ public interface InventoryHighlightConfig extends Config {
     @ConfigItem(keyName = "highlightBankPlaceholders", name = "Highlight Placeholders", description = "Whether to highlight empty bank placeholder items when bank highlighting is enabled", section = bankSection, position = 2)
     default boolean highlightBankPlaceholders() {
         return false;
+    }
+
+    // IGNORED ITEMS SETTINGS
+    @ConfigItem(keyName = "enableIgnoredItems", name = "Enable Ignored Items", description = "Toggles ignoring specific item names from highlight overlays", section = ignoredSection, position = 1)
+    default boolean enableIgnoredItems() {
+        return false;
+    }
+
+    @ConfigItem(keyName = "ignoredItems", name = "Ignored Items", description = "Comma-separated list of item names to ignore from highlights. Supports '*' wildcards (case-insensitive, e.g. 'Coins, *bones, Rune*')", section = ignoredSection, position = 2)
+    default String ignoredItems() {
+        return "";
     }
 }

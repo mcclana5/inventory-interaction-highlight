@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
@@ -14,8 +17,11 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.api.widgets.WidgetUtil;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
+import net.runelite.client.util.Text;
+import net.runelite.client.util.WildcardMatcher;
 
 public class InventoryHighlightOverlay extends WidgetItemOverlay {
     private static final long FLASH_HALF_TICK_MS = 300L;
@@ -28,6 +34,7 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
     private final InventoryHighlightRenderer renderer;
 
     private long lastGameTickTime = 0;
+    private List<String> cachedIgnoredItems = Collections.emptyList();
 
     @Inject
     public InventoryHighlightOverlay(Client client, InventoryHighlightConfig config, ItemManager itemManager,
@@ -38,6 +45,7 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         this.renderer = renderer;
         showOnInventory();
         showOnBank();
+        updateIgnoredItemsCache();
     }
 
     @Subscribe
@@ -45,10 +53,33 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         lastGameTickTime = System.currentTimeMillis();
     }
 
+    @Subscribe
+    public void onConfigChanged(ConfigChanged event) {
+        if ("inventoryhighlight".equals(event.getGroup()) && "ignoredItems".equals(event.getKey())) {
+            updateIgnoredItemsCache();
+        }
+    }
+
+    public void updateIgnoredItemsCache() {
+        String rawInput = config.ignoredItems();
+        if (rawInput == null || rawInput.trim().isEmpty()) {
+            cachedIgnoredItems = Collections.emptyList();
+        } else {
+            cachedIgnoredItems = Text.fromCSV(rawInput);
+        }
+    }
+
     @Override
     public void renderItemOverlay(Graphics2D graphics, int itemId, WidgetItem itemWidget) {
         if (itemWidget == null || itemWidget.getWidget() == null) {
             return;
+        }
+
+        if (config.enableIgnoredItems()) {
+            ItemComposition itemComp = itemManager.getItemComposition(itemId);
+            if (itemComp != null && isItemIgnored(itemComp.getName())) {
+                return;
+            }
         }
 
         boolean isBankItem = WidgetUtil
@@ -184,6 +215,20 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
                 return top != null && "Drop".equalsIgnoreCase(top.getOption());
             }
         }
+        return false;
+    }
+
+    boolean isItemIgnored(String itemName) {
+        if (itemName == null || itemName.isEmpty() || cachedIgnoredItems.isEmpty()) {
+            return false;
+        }
+
+        for (String pattern : cachedIgnoredItems) {
+            if (WildcardMatcher.matches(pattern, itemName)) {
+                return true;
+            }
+        }
+
         return false;
     }
 }
