@@ -10,7 +10,7 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
@@ -38,8 +38,8 @@ public class InventoryHighlightOverlayTest {
 
     private static final Color CYAN_BLUE = new Color(0, 255, 255, 200);
     private static final Color VIBRANT_RED = new Color(255, 50, 50, 200);
-    private static final int INVENTORY_PARENT_ID = ComponentID.INVENTORY_CONTAINER;
-    private static final int BANK_VAULT_PARENT_ID = ComponentID.BANK_ITEM_CONTAINER;
+    private static final int INVENTORY_PARENT_ID = InterfaceID.Inventory.ITEMS;
+    private static final int BANK_VAULT_PARENT_ID = InterfaceID.Bankmain.ITEMS;
 
     @Before
     public void setUp() {
@@ -270,7 +270,8 @@ public class InventoryHighlightOverlayTest {
         when(config.highlightBankPlaceholders()).thenReturn(false);
 
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 0); // quantity == 0 (placeholder)
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 0); // quantity == 0
+                                                                                                // (placeholder)
 
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
@@ -283,7 +284,8 @@ public class InventoryHighlightOverlayTest {
         when(config.highlightBankPlaceholders()).thenReturn(true);
 
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 0); // quantity == 0 (placeholder)
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0, BANK_VAULT_PARENT_ID, 0); // quantity == 0
+                                                                                                // (placeholder)
 
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
@@ -302,7 +304,8 @@ public class InventoryHighlightOverlayTest {
         return g;
     }
 
-    private WidgetItem createMockWidgetItem(int x, int y, int width, int height, int slotIndex, int parentId, int quantity) {
+    private WidgetItem createMockWidgetItem(int x, int y, int width, int height, int slotIndex, int parentId,
+            int quantity) {
         WidgetItem itemWidget = mock(WidgetItem.class);
         Widget widget = mock(Widget.class);
         Rectangle bounds = new Rectangle(x, y, width, height);

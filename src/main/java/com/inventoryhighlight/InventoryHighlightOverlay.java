@@ -9,9 +9,10 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Point;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
+import net.runelite.api.widgets.WidgetUtil;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.WidgetItemOverlay;
@@ -30,7 +31,7 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
 
     @Inject
     public InventoryHighlightOverlay(Client client, InventoryHighlightConfig config, ItemManager itemManager,
-                                    InventoryHighlightRenderer renderer) {
+            InventoryHighlightRenderer renderer) {
         this.client = client;
         this.config = config;
         this.itemManager = itemManager;
@@ -50,7 +51,8 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             return;
         }
 
-        boolean isBankItem = isBankWidget(itemWidget.getWidget());
+        boolean isBankItem = WidgetUtil
+                .componentToInterface(itemWidget.getWidget().getParentId()) == InterfaceID.BANKMAIN;
 
         // Check Bank Interface configuration settings
         if (isBankItem) {
@@ -81,18 +83,19 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
 
         // 2. Selection state highlight ("Use Item -> ...")
         boolean isSelected = client.isWidgetSelected()
-            && client.getSelectedWidget() != null
-            && client.getSelectedWidget().equals(itemWidget.getWidget());
+                && client.getSelectedWidget() != null
+                && client.getSelectedWidget().equals(itemWidget.getWidget());
 
         if (isSelected) {
             if (config.enableSelectionFlash()) {
-                // Game Tick Synchronized Flash Cycle: ON for first 300ms of game tick, OFF for second 300ms
+                // Game Tick Synchronized Flash Cycle: ON for first 300ms of game tick, OFF for
+                // second 300ms
                 long timeInTick = lastGameTickTime > 0 ? (System.currentTimeMillis() - lastGameTickTime) : 0;
                 boolean flashVisible = (timeInTick < FLASH_HALF_TICK_MS);
 
                 if (flashVisible) {
                     renderer.renderSelectionHighlight(graphics, bounds, itemId, itemWidget.getQuantity(),
-                        config.hoverColor(), config, itemManager);
+                            config.hoverColor(), config, itemManager);
                 }
             }
             return;
@@ -109,7 +112,8 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
                         if (itemWidget.getWidget().getIndex() == targetSlot) {
                             Color activeColor = getActiveHighlightColor();
                             if (activeColor != null) {
-                                renderer.renderHighlight(graphics, bounds, itemId, itemWidget.getQuantity(), activeColor, config, itemManager);
+                                renderer.renderHighlight(graphics, bounds, itemId, itemWidget.getQuantity(),
+                                        activeColor, config, itemManager);
                             }
                         }
                         return; // Suppress hover highlight on all other inventory/bank slots while menu is open
@@ -137,28 +141,22 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         if (isMouseDown && config.highlightClick()) {
             // 1-pixel inset bounds for tactile "button press" click effect
             Rectangle clickBounds = new Rectangle(
-                bounds.x + CLICK_PRESS_INSET_PX,
-                bounds.y + CLICK_PRESS_INSET_PX,
-                Math.max(1, bounds.width - (CLICK_PRESS_INSET_PX * 2)),
-                Math.max(1, bounds.height - (CLICK_PRESS_INSET_PX * 2))
-            );
+                    bounds.x + CLICK_PRESS_INSET_PX,
+                    bounds.y + CLICK_PRESS_INSET_PX,
+                    Math.max(1, bounds.width - (CLICK_PRESS_INSET_PX * 2)),
+                    Math.max(1, bounds.height - (CLICK_PRESS_INSET_PX * 2)));
 
             // Boost alpha for brighter/more solid click press color
             int pressAlpha = Math.min(255, activeColor.getAlpha() + CLICK_PRESS_ALPHA_BOOST);
-            Color pressColor = new Color(activeColor.getRed(), activeColor.getGreen(), activeColor.getBlue(), pressAlpha);
+            Color pressColor = new Color(activeColor.getRed(), activeColor.getGreen(), activeColor.getBlue(),
+                    pressAlpha);
 
-            renderer.renderHighlight(graphics, clickBounds, itemId, itemWidget.getQuantity(), pressColor, config, itemManager);
+            renderer.renderHighlight(graphics, clickBounds, itemId, itemWidget.getQuantity(), pressColor, config,
+                    itemManager);
         } else {
-            renderer.renderHighlight(graphics, bounds, itemId, itemWidget.getQuantity(), activeColor, config, itemManager);
+            renderer.renderHighlight(graphics, bounds, itemId, itemWidget.getQuantity(), activeColor, config,
+                    itemManager);
         }
-    }
-
-    private boolean isBankWidget(Widget widget) {
-        if (widget == null) {
-            return false;
-        }
-        int parentId = widget.getParentId();
-        return parentId == ComponentID.BANK_ITEM_CONTAINER || parentId == ComponentID.BANK_INVENTORY_ITEM_CONTAINER;
     }
 
     private int getRightClickedInventorySlot(MenuEntry[] entries, int containerParentId) {
@@ -173,8 +171,8 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
 
     Color getActiveHighlightColor() {
         return (isDropAction() && config.enableDropHighlight())
-            ? config.dropColor()
-            : config.hoverColor();
+                ? config.dropColor()
+                : config.hoverColor();
     }
 
     boolean isDropAction() {
