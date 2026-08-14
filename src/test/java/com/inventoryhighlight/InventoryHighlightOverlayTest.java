@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+
 import net.runelite.api.Client;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
@@ -12,6 +13,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetItem;
 import net.runelite.client.game.ItemManager;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -35,6 +37,7 @@ public class InventoryHighlightOverlayTest {
 
     private static final Color CYAN_BLUE = new Color(0, 255, 255, 200);
     private static final Color VIBRANT_RED = new Color(255, 50, 50, 200);
+    private static final int INVENTORY_PARENT_ID = 983043;
 
     @Before
     public void setUp() {
@@ -102,7 +105,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testHoverDelegatesToRenderer() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
 
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
@@ -112,9 +115,53 @@ public class InventoryHighlightOverlayTest {
     }
 
     @Test
+    public void testRightClickedItemStaysHighlightedWhileMenuIsOpen() {
+        Graphics2D graphics = createMockGraphics();
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 3); // Slot #3
+
+        // Mouse pointer has moved OUTSIDE bounds (e.g. to (100, 100) over context menu)
+        when(client.getMouseCanvasPosition()).thenReturn(new Point(100, 100));
+
+        // Right-click menu is open on screen targeting slot #3
+        when(client.isMenuOpen()).thenReturn(true);
+        MenuEntry entry = mock(MenuEntry.class);
+        Widget containerWidget = mock(Widget.class);
+        when(containerWidget.getId()).thenReturn(INVENTORY_PARENT_ID);
+        when(entry.getWidget()).thenReturn(containerWidget);
+        when(entry.getParam0()).thenReturn(3); // Target slot 3
+        when(menu.getMenuEntries()).thenReturn(new MenuEntry[] { entry });
+
+        overlay.renderItemOverlay(graphics, 4151, itemWidget);
+
+        // Verify slot #3 stays highlighted even though mouse is outside bounds
+        verify(renderer).renderHighlight(eq(graphics), eq(new Rectangle(0, 0, 36, 32)), eq(4151), eq(1), eq(CYAN_BLUE),
+                eq(config), eq(itemManager));
+    }
+
+    @Test
+    public void testOtherItemsSuppressedWhileRightClickMenuIsOpen() {
+        Graphics2D graphics = createMockGraphics();
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0); // Slot #0
+
+        // Right-click menu is open targeting slot #3
+        when(client.isMenuOpen()).thenReturn(true);
+        MenuEntry entry = mock(MenuEntry.class);
+        Widget containerWidget = mock(Widget.class);
+        when(containerWidget.getId()).thenReturn(INVENTORY_PARENT_ID);
+        when(entry.getWidget()).thenReturn(containerWidget);
+        when(entry.getParam0()).thenReturn(3); // Target slot 3
+        when(menu.getMenuEntries()).thenReturn(new MenuEntry[] { entry });
+
+        overlay.renderItemOverlay(graphics, 4151, itemWidget);
+
+        // Verify rendering is suppressed on slot #0 while menu is open for slot #3
+        verify(renderer, never()).renderHighlight(any(), any(), anyInt(), anyInt(), any(), any(), any());
+    }
+
+    @Test
     public void testClickFeedbackInsetsBoundsAndBoostsAlpha() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
 
         // Simulate active mouse press down (Button 1)
         when(client.getMouseCurrentButton()).thenReturn(1);
@@ -135,7 +182,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testSelectionFlashRendersWhenSelected() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
         Widget widget = itemWidget.getWidget();
 
         // Simulate item selected ("Use Item -> ...")
@@ -155,7 +202,7 @@ public class InventoryHighlightOverlayTest {
     @Test
     public void testDraggingWidgetSuppressesHighlightOnOtherSlots() {
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
 
         Widget draggedWidget = mock(Widget.class);
         when(draggedWidget.getIndex()).thenReturn(5); // Dragging slot #5
@@ -176,7 +223,7 @@ public class InventoryHighlightOverlayTest {
         when(config.highlightHover()).thenReturn(false);
 
         Graphics2D graphics = createMockGraphics();
-        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32);
+        WidgetItem itemWidget = createMockWidgetItem(0, 0, 36, 32, 0);
 
         overlay.renderItemOverlay(graphics, 4151, itemWidget);
 
@@ -195,7 +242,7 @@ public class InventoryHighlightOverlayTest {
         return g;
     }
 
-    private WidgetItem createMockWidgetItem(int x, int y, int width, int height) {
+    private WidgetItem createMockWidgetItem(int x, int y, int width, int height, int slotIndex) {
         WidgetItem itemWidget = mock(WidgetItem.class);
         Widget widget = mock(Widget.class);
         Rectangle bounds = new Rectangle(x, y, width, height);
@@ -203,7 +250,8 @@ public class InventoryHighlightOverlayTest {
         when(itemWidget.getWidget()).thenReturn(widget);
         when(itemWidget.getCanvasBounds()).thenReturn(bounds);
         when(itemWidget.getQuantity()).thenReturn(1);
-        when(widget.getIndex()).thenReturn(0);
+        when(widget.getIndex()).thenReturn(slotIndex);
+        when(widget.getParentId()).thenReturn(INVENTORY_PARENT_ID);
 
         Point mousePos = new Point(x + width / 2, y + height / 2);
         when(client.getMouseCanvasPosition()).thenReturn(mousePos);

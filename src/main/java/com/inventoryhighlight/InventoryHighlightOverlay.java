@@ -64,7 +64,28 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             return;
         }
 
-        // 2. Selection state highlight ("Use Item -> ...")
+        // 2. Right-click menu locking and suppression while menu remains open
+        if (client.isMenuOpen()) {
+            Menu menu = client.getMenu();
+            if (menu != null) {
+                MenuEntry[] entries = menu.getMenuEntries();
+                if (entries != null && entries.length > 0) {
+                    int targetSlot = getRightClickedInventorySlot(entries, itemWidget.getWidget().getParentId());
+                    if (targetSlot >= 0) {
+                        if (itemWidget.getWidget().getIndex() == targetSlot) {
+                            Color activeColor = getActiveHighlightColor();
+                            if (activeColor != null) {
+                                renderer.renderHighlight(graphics, bounds, itemId, itemWidget.getQuantity(), activeColor, config, itemManager);
+                            }
+                        }
+                        return; // Suppress hover highlight on all other inventory slots while menu is open
+                    }
+                }
+            }
+            return; // Suppress hover highlight while any non-inventory menu is open
+        }
+
+        // 3. Selection state highlight ("Use Item -> ...")
         boolean isSelected = client.isWidgetSelected()
             && client.getSelectedWidget() != null
             && client.getSelectedWidget().equals(itemWidget.getWidget());
@@ -83,7 +104,7 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
             return;
         }
 
-        // 3. Hover and active click highlight
+        // 4. Hover and active click highlight
         if (!config.highlightHover()) {
             return;
         }
@@ -115,6 +136,16 @@ public class InventoryHighlightOverlay extends WidgetItemOverlay {
         } else {
             renderer.renderHighlight(graphics, bounds, itemId, itemWidget.getQuantity(), activeColor, config, itemManager);
         }
+    }
+
+    private int getRightClickedInventorySlot(MenuEntry[] entries, int inventoryParentId) {
+        for (int i = entries.length - 1; i >= 0; i--) {
+            MenuEntry entry = entries[i];
+            if (entry != null && entry.getWidget() != null && entry.getWidget().getId() == inventoryParentId) {
+                return entry.getParam0(); // param0 is item slot index (0 to 27)
+            }
+        }
+        return -1;
     }
 
     Color getActiveHighlightColor() {
